@@ -1,0 +1,119 @@
+header: "item" #if set script will find this "header row" and will start parsing from next line
+
+#range: ["A","D"]
+#this option set range of columns which should be process for validation.
+#In this case form A (included) to D (included)
+#range and excludes options can be used together
+
+validators:
+
+  columns:
+    A:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+
+    B:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: false
+    C:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+    D:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+    E:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: false
+
+    F:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =VLOOKUP(E<rowIndex>,'Accidents, Hazards & Harms '!$B$2:$C$120,2,FALSE)
+          notBlank: true
+          mergeable: false
+    G:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =VLOOKUP(F<rowIndex>,'Accidents, Hazards & Harms '!$G$2:$H$83,2,FALSE)
+          notBlank: true
+          mergeable: false
+    H:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =VLOOKUP(VLOOKUP($G<rowIndex>,'Accidents, Hazards & Harms '!$H$2:$I$166,2,FALSE),'Accidents, Hazards & Harms '!$K$2:$M$135,2,FALSE)
+          notBlank: true
+          mergeable: false
+    I:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =VLOOKUP(VLOOKUP($G<rowIndex>,'Accidents, Hazards & Harms '!$H$2:$I$166,2,FALSE),'Accidents, Hazards & Harms '!$K$2:$M$135,3,FALSE)
+          notBlank: true
+          mergeable: false
+    J:
+      - Type:
+          type: integer
+          message: "Value should be an integer"
+          notBlank: true
+          mergeable: false
+    K:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+    L:
+      - Type:
+          type: integer
+          message: "Value should be an integer"
+          notBlank: true
+          mergeable: false
+    M:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =J<rowIndex>*L<rowIndex>
+          notBlank: true
+          mergeable: false
+    N:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =IF(M<rowIndex><16,IF(M<rowIndex><8,1,2),3)
+          notBlank: true
+          mergeable: false
+    O:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =I<rowIndex>*J<rowIndex>*L<rowIndex>
+          notBlank: true
+          mergeable: false
+    P:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =INDEX('Scoring criteria'!$H$4:$L$6, MATCH(FMEA!N<rowIndex>, 'Scoring criteria'!$F$4:$F$6, 0), MATCH(FMEA!I<rowIndex>, 'Scoring criteria'!$H$3:$L$3, 0))
+          notBlank: true
+          mergeable: false
+
+
+
