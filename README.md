@@ -9,7 +9,7 @@ Therefore, we built this tool to help validate that format of the Excel files.
 Rulesets are defined within 'yaml' configuration file. Example content of a yaml configuration file is below.
 
 ```
---- # Sample yaml config file
+--- # Sample yaml config file. Note that dynamic values such as <rowIndex> or <cellIndex> are substituted by the respective positioning.
 validators:
 
   columns:

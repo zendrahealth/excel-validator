@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -17,6 +18,7 @@ import java.lang.reflect.RecordComponent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class YamlParser {
@@ -124,18 +126,39 @@ public class YamlParser {
             final Identifier identifier = new Identifier(cell.getRowIndex(), cell.getColumnIndex(), columnName(cell.getColumnIndex()));
             List<Message> messages = new ArrayList<>();
 
+            Message notBlankMessage = new Message(identifier, this.type, "Expected:Not Blank, Actual: Blank");
             if (Boolean.TRUE.equals(type.notBlank) &&
-                    cell.getCellType().equals(CellType.BLANK) &&
-                    (!type().mergeable() || getIndexIfCellIsInMergedCells(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex()).isEmpty())) {
-                messages.add(
-                        new Message(identifier, this.type, "Expected:Not Blank, Actual: Blank")
-                );
+                    cell.getCellType().equals(CellType.BLANK)) {
+
+                if (type().mergeable()) {
+                    getCellAddressCellIfMerged(cell.getSheet(), cell.getRowIndex(), cell.getColumnIndex())
+                            .ifPresent(
+                                    cellAddresses -> {
+                                        boolean emptyMergedCell = true;
+                                        for (int rowNum = cellAddresses.getFirstRow(); rowNum <= cellAddresses.getLastRow(); rowNum++) {
+                                            final Row row = cell.getSheet().getRow(rowNum);
+                                            for (int cellNum = cellAddresses.getFirstColumn(); cellNum <= cellAddresses.getLastColumn(); cellNum++) {
+                                                final Cell cell1 = row.getCell(cellNum);
+                                                if (!cell1.getCellType().equals(CellType.BLANK)) {
+                                                    emptyMergedCell = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (emptyMergedCell) {
+                                            messages.add(notBlankMessage);
+                                        }
+                                    });
+                } else {
+                    messages.add(notBlankMessage);
+                }
+
             }
 
             if (type.type == TypeEnum.integer && cell.getCellType() != CellType.NUMERIC ||
                     (cell.getCellType() == CellType.NUMERIC && !isNumeric(cell))) {
                 messages.add(
-                        new Message(identifier, this.type, "Expected:Integer, Actual: Non Integer "));
+                        new Message(identifier, this.type, "Expected:Integer, Actual: Non Integer"));
             }
 
 
@@ -168,14 +191,14 @@ public class YamlParser {
             }
         }
 
-        private Optional<Integer> getIndexIfCellIsInMergedCells(Sheet sheet, int row, int column) {
+        private Optional<CellRangeAddress> getCellAddressCellIfMerged(Sheet sheet, int row, int column) {
             int numberOfMergedRegions = sheet.getNumMergedRegions();
 
             for (int i = 0; i < numberOfMergedRegions; i++) {
                 CellRangeAddress mergedCell = sheet.getMergedRegion(i);
 
                 if (mergedCell.isInRange(row, column)) {
-                    return Optional.of(i);
+                    return Optional.of(mergedCell);
                 }
             }
 
