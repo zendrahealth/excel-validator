@@ -122,6 +122,15 @@ public class MainTest {
         assertEquals(2, statusCode);
     }
 
+    @Test
+    public void mainMethodExecutionParamsWithErrorsThrowsNoSystemExit() throws Exception {
+        File fmeaFile = getFile("FMEA.xlsx");
+        File yaml1File = getFile("initialRiskAssessmentFMEAValidator.yml");
+        File yaml2File = getFile("postRiskMitigationFMEAValidator.yml");
+
+        Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml2File.getAbsolutePath(), yaml2File.getAbsolutePath()});
+    }
+
     private File getFile(String filePath) {
         ClassLoader classLoader = MainTest.class.getClassLoader();
         return new File(classLoader.getResource(filePath).getFile());
