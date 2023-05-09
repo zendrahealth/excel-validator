@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import static com.github.stefanbirkner.systemlambda.SystemLambda.catchSystemExit;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MainTest {
@@ -109,6 +110,17 @@ public class MainTest {
         assertEquals("Expected:=INDEX('Scoring criteria'!$H$4:$L$6, MATCH(FMEA!W10, 'Scoring criteria'!$F$4:$F$6, 0), MATCH(FMEA!S10, 'Scoring criteria'!$H$3:$L$3, 0)), Actual:INDEX('Scoring criteria'!$H$4:$L$6, MATCH(FMEA!W10, 'Scoring criteria'!$F$4:$F$6, 0), MATCH(FMEA!R10, 'Scoring criteria'!$H$3:$L$3, 0))",message.message());
     }
 
+    @Test
+    public void mainMethodExecutionParamsWithErrorsThrowsSystemErrorExitCode2() throws Exception {
+        File fmeaFile = getFile("FMEA_wrong_formula_Y10.xlsx");
+        File yaml1File = getFile("initialRiskAssessmentFMEAValidator.yml");
+        File yaml2File = getFile("postRiskMitigationFMEAValidator.yml");
+
+        int statusCode = catchSystemExit(() -> {
+            Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml2File.getAbsolutePath(), yaml2File.getAbsolutePath()});
+        });
+        assertEquals(2, statusCode);
+    }
 
     private File getFile(String filePath) {
         ClassLoader classLoader = MainTest.class.getClassLoader();
