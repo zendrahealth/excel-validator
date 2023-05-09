@@ -13,7 +13,7 @@ public class YamlParserTest {
     @Test
     public void readFMEA() throws IOException {
         YamlParser yamlParser = new YamlParser();
-        File fmeaFile = getFile("validator.yml");
+        File fmeaFile = getFile("initialRiskAssessmentFMEAValidator.yml");
         final YamlParser.Config config = yamlParser.parse(fmeaFile);
         assertNotNull(config);
     }

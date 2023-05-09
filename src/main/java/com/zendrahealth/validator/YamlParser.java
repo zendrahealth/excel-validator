@@ -31,10 +31,12 @@ public class YamlParser {
         public List<TypeHolder> getTypesForColumn(int columnIndex) throws NoSuchFieldException, IllegalAccessException {
 
             final RecordComponent[] recordComponents = columns.getClass().getRecordComponents();
-            Field field = columns.getClass().getDeclaredField(recordComponents[columnIndex].getAccessor().getName());
+            final String name = recordComponents[columnIndex].getAccessor().getName();
+            Field field = columns.getClass().getDeclaredField(name);
             field.setAccessible(true);
 
-            return (List<TypeHolder>) field.get(columns);
+            final Object o = field.get(columns);
+            return (List<TypeHolder>) o;
 
         }
     }
@@ -96,12 +98,11 @@ public class YamlParser {
 
     }
 
-    public record Identifier(int rowNumber, int cellNumber, String cellColumn) {
+    public record Identifier(int rowNumber, String cellColumn) {
         @Override
         public String toString() {
             return "Identifier{" +
                     "rowNumber=" + rowNumber +
-                    ", cellNumber=" + cellNumber +
                     ", cellColumn='" + cellColumn + '\'' +
                     '}';
         }
@@ -123,7 +124,7 @@ public class YamlParser {
     public record TypeHolder(@JsonProperty("Type") Type type) {
 
         public List<Message> validate(Cell cell) {
-            final Identifier identifier = new Identifier(cell.getRowIndex(), cell.getColumnIndex(), columnName(cell.getColumnIndex()));
+            final Identifier identifier = new Identifier(cell.getRowIndex()+1, columnName(cell.getColumnIndex()));
             List<Message> messages = new ArrayList<>();
 
             Message notBlankMessage = new Message(identifier, this.type, "Expected:Not Blank, Actual: Blank");
@@ -162,20 +163,27 @@ public class YamlParser {
             }
 
 
-            if (type.type == TypeEnum.formula && cell.getCellType() == CellType.FORMULA) {
+            if (type.type == TypeEnum.formula) {
                 final String substitutedFormula = type.formula
                                     .replace("(^=)","")
                                     .replace("<rowIndex>", (cell.getRowIndex() + 1) + "")
                                     .replace("<cellIndex>", (cell.getColumnIndex() + 1) + "");
 
                 final String expected = substitutedFormula;
-                final String actual = cell.getCellFormula().trim();
 
-                // actual may not have leading '=' so do a contain instead
-                if (!expected.contains(actual)) {
+                if (cell.getCellType() != CellType.FORMULA) {
                     messages.add(
-                            new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, actual))
+                            new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, "Not a Formula but of type:"+cell.getCellType().name()))
                     );
+                } else {
+                    final String actual = cell.getCellFormula().trim();
+
+                    // actual may not have leading '=' so do a contain instead
+                    if (!expected.contains(actual)) {
+                        messages.add(
+                                new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, actual))
+                        );
+                    }
                 }
             }
 

@@ -1,0 +1,70 @@
+header: "item" #if set script will find this "header row" and will start parsing from next line
+
+#range: ["A","D"]
+#this option set range of columns which should be process for validation.
+#In this case form A (included) to D (included)
+#range and excludes options can be used together
+
+validators:
+
+  columns:
+    Q:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+
+    R:
+      - Type:
+          type: string
+          message: "Value should be string"
+          notBlank: true
+          mergeable: true
+    S:
+      - Type:
+          type: integer
+          message: "Value should be an integer"
+          notBlank: true
+          mergeable: true
+    T:
+      - Type:
+          type: integer
+          message: "Value should be an integer"
+          notBlank: true
+          mergeable: false
+    U:
+      - Type:
+          type: integer
+          message: "Value should be an integer"
+          notBlank: true
+          mergeable: false
+
+    V:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =T<rowIndex>*U<rowIndex>
+          notBlank: true
+          mergeable: false
+    W:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =IF(V<rowIndex><16,IF(V<rowIndex><8,1,2),3)
+          notBlank: true
+          mergeable: false
+    X:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =S<rowIndex>*T<rowIndex>*U<rowIndex>
+          notBlank: true
+          mergeable: false
+    Y:
+      - Type:
+          type: formula
+          message: "Value should be formula"
+          formula: =INDEX('Scoring criteria'!$H$4:$L$6, MATCH(FMEA!W<rowIndex>, 'Scoring criteria'!$F$4:$F$6, 0), MATCH(FMEA!S<rowIndex>, 'Scoring criteria'!$H$3:$L$3, 0))
+          notBlank: true
+          mergeable: false

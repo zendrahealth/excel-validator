@@ -58,7 +58,7 @@ validators:
 
  - Checkout this source code locally
  - Within the source folder location, execute the command`./gradlew build`  which generates the executable jar within `build/libs` folder
- - Execute command`java -jar build/libs/excel-validator-1.0-SNAPSHOT.jar src/test/resources/FMEA.xlsx src/test/resources/validator.yml` to perform validation.
+ - Execute command `java -jar build/libs/excel-validator-1.0-SNAPSHOT.jar src/test/resources/FMEA.xlsx src/test/resources/initialRiskAssessmentFMEAValidator.yml` to perform validation.
    - Success message is returned if all ok, otherwise error message is returned along with the problem rows outputed to console
-   - Multiple yaml configuration files files are supported `java -jar build/libs/excel-validator-1.0-SNAPSHOT.jar validator1.yml validator2.yml`
+   - Multiple yaml configuration files files are supported `java -jar build/libs/excel-validator-1.0-SNAPSHOT.jar src/test/resources/FMEA.xlsx src/test/resources/initialRiskAssessmentFMEAValidator.yml src/test/resources/postRiskMitigationFMEAValidator.yml`
 

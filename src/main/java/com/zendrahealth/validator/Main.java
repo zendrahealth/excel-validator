@@ -38,11 +38,10 @@ public class Main {
                         Cell cell = cellIterator.next();
                         List<YamlParser.TypeHolder> types = config.validators().getTypesForColumn(cell.getColumnIndex());
 
-                        if (types == null) {
-                            logger.debug("Stopping at identifier  Row Index:{}  Col:{}", (cell.getRowIndex() + 1), YamlParser.columnName(cell.getColumnIndex() + 1));
-                            break;
+                        if (types != null) {
+                            types.forEach(type -> messages.addAll(type.validate(cell)));
                         }
-                        types.forEach(type -> messages.addAll(type.validate(cell)));
+
                     }
                 }
             }
