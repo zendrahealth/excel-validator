@@ -44,7 +44,7 @@ validators:
       - Type:
           type: formula
           message: "Value should be formula"
-          formula: =VLOOKUP(E<rowIndex>,'Accidents, Hazards & Harms '!$B$2:$C$120,2,FALSE)
+          formula: =VLOOKUP(E<rowIndex>,'Accidents, Hazards & Harms '!$B$2:$C$190,2,FALSE)
           notBlank: true
           mergeable: false
     G:
