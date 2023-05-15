@@ -184,6 +184,10 @@ public class YamlParser {
                                 new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, actual))
                         );
                     }
+                    switch(cell.getCachedFormulaResultType()) {
+                        case ERROR -> messages.add(new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, "Error in cell value")));
+                        case BLANK -> messages.add(new Message(identifier, this.type, String.format("Expected:%s, Actual:%s", expected, "Blank")));
+                    }
                 }
             }
 

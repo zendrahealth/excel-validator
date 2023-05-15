@@ -28,8 +28,6 @@ public class MainTest {
         File fmeaFile = getFile("FMEA_missing_formula_N4.xlsx");
         File yamlFile = getFile("initialRiskAssessmentFMEAValidator.yml");
         final List<YamlParser.Message> messages = main.processFile(fmeaFile, Collections.singletonList(new YamlParser().parse(yamlFile)));
-        assertTrue(messages.size()==2, "2 validation error messages should be exist");
-        final YamlParser.Message message = messages.get(0);
 
         final YamlParser.Identifier identifier = new YamlParser.Identifier(4, "N");
 
@@ -87,9 +85,34 @@ public class MainTest {
         assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(identifier) && m.message().equals("Expected:Integer, Actual: Non Integer")));
     }
 
+    @Test
+    public void readInitialRiskAssessmentFMEAWithNonNumericDataInNumericFieldJ2DisplaysErrorMessageNonNumericValuePresent() throws IOException {
+        Main main = new Main();
+        File fmeaFile = getFile("FMEA_non_numeric_field_in_numeric_field.xlsx");
+        File yamlFile = getFile("initialRiskAssessmentFMEAValidator.yml");
+        final List<YamlParser.Message> messages = main.processFile(fmeaFile, Collections.singletonList(new YamlParser().parse(yamlFile)));
+
+        assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(new YamlParser.Identifier(2, "J")) && m.type().type() == YamlParser.TypeEnum.integer && m.message().equals("Expected:Integer, Actual: Non Integer")));
+
+        assertTrue(messages.size()>1);
+    }
 
     @Test
-    public void readPostMitigiationInCorrectFormatHasNoErrorMessages() throws IOException {
+    public void readInitialRiskAssessmentFMEAWithNonNumericDataInNumericFieldJ2DisplaysErrorMessageFormulaValueError() throws IOException {
+        Main main = new Main();
+        File fmeaFile = getFile("FMEA_non_numeric_field_in_numeric_field.xlsx");
+        File yamlFile = getFile("initialRiskAssessmentFMEAValidator.yml");
+        final List<YamlParser.Message> messages = main.processFile(fmeaFile, Collections.singletonList(new YamlParser().parse(yamlFile)));
+
+        assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(new YamlParser.Identifier(2, "M")) && m.type().type() == YamlParser.TypeEnum.formula && m.message().equals("Expected:=J2*L2, Actual:Error in cell value")));
+        assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(new YamlParser.Identifier(2, "N")) && m.type().type() == YamlParser.TypeEnum.formula && m.message().equals("Expected:=IF(M2<16,IF(M2<8,1,2),3), Actual:Error in cell value")));
+        assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(new YamlParser.Identifier(2, "O")) && m.type().type() == YamlParser.TypeEnum.formula && m.message().equals("Expected:=I2*J2*L2, Actual:Error in cell value")));
+        assertTrue(messages.stream().anyMatch(m -> m.identifier().equals(new YamlParser.Identifier(2, "P")) && m.type().type() == YamlParser.TypeEnum.formula && m.message().equals("Expected:=INDEX('Scoring criteria'!$H$4:$L$6, MATCH(FMEA!N2, 'Scoring criteria'!$F$4:$F$6, 0), MATCH(FMEA!I2, 'Scoring criteria'!$H$3:$L$3, 0)), Actual:Error in cell value")));
+
+        assertTrue(messages.size()>1);
+    }
+    @Test
+    public void readPostMitigationInCorrectFormatHasNoErrorMessages() throws IOException {
         Main main = new Main();
         File fmeaFile = getFile("FMEA.xlsx");
         File yamlFile = getFile("postRiskMitigationFMEAValidator.yml");
@@ -98,7 +121,7 @@ public class MainTest {
     }
 
     @Test
-    public void readPostMitigiationWrongFormulataInYHasErrorMessages() throws IOException {
+    public void readPostMitigationWrongFormulaInY10HasErrorMessages() throws IOException {
         Main main = new Main();
         File fmeaFile = getFile("FMEA_wrong_formula_Y10.xlsx");
         File yamlFile = getFile("postRiskMitigationFMEAValidator.yml");
@@ -117,18 +140,30 @@ public class MainTest {
         File yaml2File = getFile("postRiskMitigationFMEAValidator.yml");
 
         int statusCode = catchSystemExit(() -> {
-            Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml2File.getAbsolutePath(), yaml2File.getAbsolutePath()});
+            Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml1File.getAbsolutePath(), yaml2File.getAbsolutePath()});
         });
         assertEquals(2, statusCode);
     }
 
     @Test
-    public void mainMethodExecutionParamsWithErrorsThrowsNoSystemExit() throws Exception {
+    public void mainMethodExecutionParamsWithNoErrorsThrowsNoSystemExit() throws Exception {
         File fmeaFile = getFile("FMEA.xlsx");
         File yaml1File = getFile("initialRiskAssessmentFMEAValidator.yml");
         File yaml2File = getFile("postRiskMitigationFMEAValidator.yml");
 
-        Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml2File.getAbsolutePath(), yaml2File.getAbsolutePath()});
+        Main.main(new String[] {fmeaFile.getAbsolutePath(), yaml1File.getAbsolutePath(), yaml2File.getAbsolutePath()});
+    }
+
+    @Test
+    public void mainMethodExecutionIncorrectParamsErrorsThrowsSystemErrorExitCode2() throws Exception {
+        File fmeaFile = getFile("FMEA_wrong_formula_Y10.xlsx");
+        File yaml1File = getFile("initialRiskAssessmentFMEAValidator.yml");
+        File yaml2File = getFile("postRiskMitigationFMEAValidator.yml");
+
+        int statusCode = catchSystemExit(() -> {
+            Main.main(new String[] {yaml1File.getAbsolutePath(), fmeaFile.getAbsolutePath(), yaml2File.getAbsolutePath()});
+        });
+        assertEquals(2, statusCode);
     }
 
     private File getFile(String filePath) {

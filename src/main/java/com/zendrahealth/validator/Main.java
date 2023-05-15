@@ -62,7 +62,7 @@ public class Main {
 
                 List<YamlParser.Config> configs = new ArrayList<>();
                 for (int i = 1; i< args.length; i ++) {
-                    File yamlFile = new File(args[1]);
+                    File yamlFile = new File(args[i]);
                     configs.add(new YamlParser().parse(yamlFile));
                 }
                 Main main = new Main();
